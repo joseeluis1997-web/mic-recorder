@@ -150,6 +150,16 @@
     font-size: 13px;
     min-height: 20px;
   }
+
+  .session-complete {
+    text-align: center;
+    background: #e8f5e9;
+    border-radius: 16px;
+    padding: 16px;
+    color: #2e7d32;
+    font-size: 16px;
+    display: none;
+  }
 </style>
 </head>
 <body>
@@ -170,7 +180,10 @@
 <div class="chat-area" id="chatArea">
   <div id="statusText"></div>
   <div id="conversationBox"></div>
-  <div class="input-row">
+  <div class="session-complete" id="sessionComplete">
+    ✅ ¡Sesión completada! <br>¡Muy bien! Hasta la próxima con Chepe 🦜
+  </div>
+  <div class="input-row" id="inputRow">
     <button id="micButton">🎤</button>
     <input id="userInput" type="text" placeholder="Escribe tu mensaje...">
     <button id="sendButton">Enviar</button>
@@ -206,6 +219,13 @@ function setStatus(text) {
 function playAudio(base64Audio) {
   const audio = new Audio(`data:audio/mpeg;base64,${base64Audio}`);
   audio.play().catch(e => console.log('Audio play error:', e));
+}
+
+// End session UI
+function endSession() {
+  document.getElementById('inputRow').style.display = 'none';
+  document.getElementById('sessionComplete').style.display = 'block';
+  setStatus('');
 }
 
 // Send message to Chepe
@@ -245,9 +265,18 @@ async function sendToChepe(userMessage) {
       playAudio(data.audio);
     }
 
+    // Check if session ended
+    if (data.sessionEnded) {
+      setTimeout(() => endSession(), 3000);
+    }
+
   } catch (err) {
     setStatus('⚠️ Error de conexión: ' + err.message);
   } finally {
+    if (!document.getElementById('sessionComplete').style.display === 'block') {
+      document.getElementById('sendButton').disabled = false;
+      document.getElementById('micButton').disabled = false;
+    }
     document.getElementById('sendButton').disabled = false;
     document.getElementById('micButton').disabled = false;
   }
