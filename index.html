@@ -1,105 +1,177 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
+
 <html>
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+
+<style>
+
+  body {
+
+    margin: 0;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background: transparent;
+
+  }
+
+  #micBtn {
+
+    background: #29ABE2;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 50%;
+
+    width: 60px;
+
+    height: 60px;
+
+    font-size: 24px;
+
+    cursor: pointer;
+
+  }
+
+  #micBtn.recording {
+
+    background: #e74c3c;
+
+    animation: pulse 1s infinite;
+
+  }
+
+  @keyframes pulse {
+
+    0% { transform: scale(1); }
+
+    50% { transform: scale(1.1); }
+
+    100% { transform: scale(1); }
+
+  }
+
+</style>
+
 </head>
+
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1">&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: transparent;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>#micBtn {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: #29ABE2;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 50%;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>width: 60px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>height: 60px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-size: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>#micBtn.recording {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: #e74c3c;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>animation: pulse 1s infinite;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>@keyframes pulse {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>0% { transform: scale(1); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>50% { transform: scale(1.1); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>100% { transform: scale(1); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1">&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1">&lt;button id="micBtn"&gt;🎤&lt;/button&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">let mediaRecorder;</p>
-<p class="p1">let audioChunks = [];</p>
-<p class="p1">let recording = false;</p>
-<p class="p1">const btn = document.getElementById('micBtn');</p>
-<p class="p2"><br></p>
-<p class="p1">btn.addEventListener('click', async () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (recording) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>mediaRecorder.stop();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>recording = false;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>btn.classList.remove('recording');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>btn.innerHTML = '🎤';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const stream = await navigator.mediaDevices.getUserMedia({ audio: true });</p>
-<p class="p1"><span class="Apple-converted-space">    </span>audioChunks = [];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>mediaRecorder = new MediaRecorder(stream);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>mediaRecorder.ondataavailable = e =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (e.data.size &gt; 0) audioChunks.push(e.data);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>mediaRecorder.onstop = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const blob = new Blob(audioChunks, { type: 'audio/webm' });</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const reader = new FileReader();</p>
-<p class="p1"><span class="Apple-converted-space">      </span>reader.readAsDataURL(blob);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>reader.onloadend = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const base64 = reader.result.split(',')[1];</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.parent.postMessage({</p>
-<p class="p1"><span class="Apple-converted-space">          </span>type: 'audioReady',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>audio: base64</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}, '*');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p1"><span class="Apple-converted-space">      </span>stream.getTracks().forEach(t =&gt; t.stop());</p>
-<p class="p1"><span class="Apple-converted-space">      </span>btn.innerHTML = '🎤';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>mediaRecorder.start();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>recording = true;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>btn.classList.add('recording');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>btn.innerHTML = '⏹';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>} catch(err) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>window.parent.postMessage({</p>
-<p class="p1"><span class="Apple-converted-space">      </span>type: 'micError',</p>
-<p class="p1"><span class="Apple-converted-space">      </span>error: err.message</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}, '*');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1">});</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+<button id="micBtn">🎤</button>
+
+
+
+<script>
+
+let mediaRecorder;
+
+let audioChunks = [];
+
+let recording = false;
+
+const btn = document.getElementById('micBtn');
+
+
+
+btn.addEventListener('click', async () => {
+
+  if (recording) {
+
+    mediaRecorder.stop();
+
+    recording = false;
+
+    btn.classList.remove('recording');
+
+    btn.innerHTML = '🎤';
+
+    return;
+
+  }
+
+
+
+  try {
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    audioChunks = [];
+
+    mediaRecorder = new MediaRecorder(stream);
+
+
+
+    mediaRecorder.ondataavailable = e => {
+
+      if (e.data.size > 0) audioChunks.push(e.data);
+
+    };
+
+
+
+    mediaRecorder.onstop = () => {
+
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+
+      const reader = new FileReader();
+
+      reader.readAsDataURL(blob);
+
+      reader.onloadend = () => {
+
+        const base64 = reader.result.split(',')[1];
+
+        window.parent.postMessage({
+
+          type: 'audioReady',
+
+          audio: base64
+
+        }, '*');
+
+      };
+
+      stream.getTracks().forEach(t => t.stop());
+
+      btn.innerHTML = '🎤';
+
+    };
+
+
+
+    mediaRecorder.start();
+
+    recording = true;
+
+    btn.classList.add('recording');
+
+    btn.innerHTML = '⏹';
+
+
+
+  } catch(err) {
+
+    window.parent.postMessage({
+
+      type: 'micError',
+
+      error: err.message
+
+    }, '*');
+
+  }
+
+});
+
+</script>
+
 </body>
+
 </html>
