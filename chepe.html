@@ -39,19 +39,16 @@
     gap: 8px;
   }
 
-  .chepe-container img {
-    width: 140px;
+  .chepe-avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
   }
 
   .lesson-code {
     color: #29ABE2;
     font-size: 22px;
     font-weight: bold;
-  }
-
-  .topic-label {
-    color: #666;
-    font-size: 14px;
   }
 
   #startButton {
@@ -70,6 +67,19 @@
     cursor: not-allowed;
   }
 
+  .exercise-image-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 0 20px;
+    display: none;
+  }
+
+  .exercise-image-container img {
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+
   .chat-area {
     width: 100%;
     max-width: 600px;
@@ -77,14 +87,15 @@
     display: none;
     flex-direction: column;
     gap: 12px;
+    margin-top: 12px;
   }
 
   #conversationBox {
     background: white;
     border-radius: 16px;
     padding: 16px;
-    min-height: 200px;
-    max-height: 350px;
+    min-height: 180px;
+    max-height: 300px;
     overflow-y: auto;
     font-size: 15px;
     line-height: 1.6;
@@ -117,9 +128,7 @@
     cursor: pointer;
   }
 
-  #sendButton:disabled {
-    background: #aaa;
-  }
+  #sendButton:disabled { background: #aaa; }
 
   #micButton {
     background: #29ABE2;
@@ -159,6 +168,9 @@
     color: #2e7d32;
     font-size: 16px;
     display: none;
+    margin: 0 20px;
+    max-width: 600px;
+    width: calc(100% - 40px);
   }
 </style>
 </head>
@@ -169,19 +181,23 @@
 </header>
 
 <div class="chepe-container">
-  <img src="https://static.wixstatic.com/media/cd2a90_7b35e2e0a4a94aab8b3d8b7a5d0c1234~mv2.png" 
-       onerror="this.style.fontSize='80px'; this.style.lineHeight='1'; this.innerHTML='🦜';"
+  <img class="chepe-avatar" 
+       src="https://static.wixstatic.com/media/cd2a90_7b35e2e0a4a94aab8b3d8b7a5d0c1234~mv2.png" 
+       onerror="this.src=''; this.style.fontSize='80px'; this.style.background='none'; this.outerHTML='<div style=font-size:80px>🦜</div>';"
        alt="Chepe">
   <div class="lesson-code" id="lessonCodeDisplay">...</div>
-  <div class="topic-label" id="topicDisplay"></div>
   <button id="startButton">🦜 Comenzar con Chepe</button>
+</div>
+
+<div class="exercise-image-container" id="exerciseImageContainer">
+  <img id="exerciseImage" src="" alt="Ejercicio">
 </div>
 
 <div class="chat-area" id="chatArea">
   <div id="statusText"></div>
   <div id="conversationBox"></div>
   <div class="session-complete" id="sessionComplete">
-    ✅ ¡Sesión completada! <br>¡Muy bien! Hasta la próxima con Chepe 🦜
+    ✅ ¡Sesión completada! ¡Muy bien! Hasta la próxima con Chepe 🦜
   </div>
   <div class="input-row" id="inputRow">
     <button id="micButton">🎤</button>
@@ -193,7 +209,6 @@
 <script>
 const WORKER_URL = 'https://chepe-ai.jose-1d1.workers.dev';
 
-// Get lesson code from URL
 const params = new URLSearchParams(window.location.search);
 const lessonCode = (params.get('lesson') || 'BQ3C01').toUpperCase();
 document.getElementById('lessonCodeDisplay').textContent = lessonCode;
@@ -203,7 +218,6 @@ let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
 
-// Add message to conversation
 function addMessage(speaker, text) {
   const box = document.getElementById('conversationBox');
   const current = box.textContent;
@@ -215,20 +229,17 @@ function setStatus(text) {
   document.getElementById('statusText').textContent = text;
 }
 
-// Play base64 audio
 function playAudio(base64Audio) {
   const audio = new Audio(`data:audio/mpeg;base64,${base64Audio}`);
-  audio.play().catch(e => console.log('Audio play error:', e));
+  audio.play().catch(e => console.log('Audio error:', e));
 }
 
-// End session UI
 function endSession() {
   document.getElementById('inputRow').style.display = 'none';
   document.getElementById('sessionComplete').style.display = 'block';
   setStatus('');
 }
 
-// Send message to Chepe
 async function sendToChepe(userMessage) {
   if (userMessage) {
     addMessage('Tú: ', userMessage);
@@ -245,7 +256,7 @@ async function sendToChepe(userMessage) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         lessonCode,
-        studentText: userMessage || 'Hola',
+        studentText: userMessage || 'START_SESSION',
         conversationHistory
       })
     });
@@ -257,6 +268,14 @@ async function sendToChepe(userMessage) {
       return;
     }
 
+    // Show exercise image if available
+    if (data.imageUrl) {
+      const imgContainer = document.getElementById('exerciseImageContainer');
+      const img = document.getElementById('exerciseImage');
+      img.src = data.imageUrl;
+      imgContainer.style.display = 'block';
+    }
+
     conversationHistory.push({ role: 'assistant', content: data.reply });
     addMessage('🦜 Chepe: ', data.reply);
     setStatus('');
@@ -265,31 +284,24 @@ async function sendToChepe(userMessage) {
       playAudio(data.audio);
     }
 
-    // Check if session ended
     if (data.sessionEnded) {
       setTimeout(() => endSession(), 3000);
     }
 
   } catch (err) {
-    setStatus('⚠️ Error de conexión: ' + err.message);
+    setStatus('⚠️ Error: ' + err.message);
   } finally {
-    if (!document.getElementById('sessionComplete').style.display === 'block') {
-      document.getElementById('sendButton').disabled = false;
-      document.getElementById('micButton').disabled = false;
-    }
     document.getElementById('sendButton').disabled = false;
     document.getElementById('micButton').disabled = false;
   }
 }
 
-// Start button
 document.getElementById('startButton').addEventListener('click', async () => {
   document.getElementById('startButton').disabled = true;
   document.getElementById('chatArea').style.display = 'flex';
   await sendToChepe(null);
 });
 
-// Send button
 document.getElementById('sendButton').addEventListener('click', async () => {
   const input = document.getElementById('userInput');
   const message = input.value.trim();
@@ -298,14 +310,10 @@ document.getElementById('sendButton').addEventListener('click', async () => {
   await sendToChepe(message);
 });
 
-// Enter key sends message
 document.getElementById('userInput').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    document.getElementById('sendButton').click();
-  }
+  if (e.key === 'Enter') document.getElementById('sendButton').click();
 });
 
-// Microphone button
 document.getElementById('micButton').addEventListener('click', async () => {
   const micBtn = document.getElementById('micButton');
 
@@ -350,7 +358,7 @@ document.getElementById('micButton').addEventListener('click', async () => {
           setStatus('⚠️ No se entendió. Intenta de nuevo.');
         }
       } catch (err) {
-        setStatus('⚠️ Error de transcripción: ' + err.message);
+        setStatus('⚠️ Error: ' + err.message);
       } finally {
         micBtn.disabled = false;
         micBtn.textContent = '🎤';
